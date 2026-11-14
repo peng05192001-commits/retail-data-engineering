@@ -1,0 +1,20 @@
+# Private inputs and generated record-level outputs
+**/raw_package/
+**/data/
+**/outputs/
+**/figures/
+**/*_clean.csv
+**/*_standardised.csv
+**/audit_log*.csv
+**/*_validation.json
+**/integration_verification.json
+*.zip
+*.docx
+*.pdf
+*.env
+.env*
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+.DS_Store

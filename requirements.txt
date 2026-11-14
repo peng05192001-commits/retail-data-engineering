@@ -1,0 +1,12 @@
+# Python 3.12; the frozen sentiment resource requires this exact NLTK version.
+numpy==2.3.5
+pandas>=2.2,<4
+matplotlib>=3.9,<4
+nltk==3.9.2
+scikit-learn==1.6.1
+scipy==1.15.3
+ipython>=8,<10
+ipykernel>=6,<8
+nbformat>=5.10,<6
+nbclient>=0.10,<1
+nbconvert>=7,<8

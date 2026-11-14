@@ -1,0 +1,9 @@
+case_id,function,input_value,expected_output,purpose
+SYN-01,clean_narrative_text,[SYSTEM] <p>FAST lamp</p>,fast lamp,Synthetic regression case
+SYN-02,clean_narrative_text,[CATALOGUE] <i>Green mug</i> https://example.test,green mug,Synthetic regression case
+SYN-03,clean_narrative_text,Café 包装好,café 包装好,Synthetic regression case
+SYN-04,extract_order_reference,reference HORD654321,HORD654321,Synthetic regression case
+SYN-05,extract_product_sku,model SKU-ZYX987,SKU-ZYX987,Synthetic regression case
+SYN-06,extract_promo_code,offer B4SAVE-35,B4SAVE-35,Synthetic regression case
+SYN-07,build_latin_analysis,café 好,café,Synthetic regression case
+SYN-08,contains_non_latin_script,lamp 好,True,Synthetic regression case

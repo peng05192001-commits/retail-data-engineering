@@ -1,2 +1,65 @@
-# retail-data-engineering
-Multi-source retail data integration, evidence-based cleansing, audit validation and customer profiling in Python.
+# Retail Data Engineering
+
+多源零售数据整合、可追溯清洗与客户画像。Python 项目，将嵌套 JSON/XML 转成关系表，再通过业务规则、线性方程和季节运费模型处理另一批订单的错误、缺失与异常，最后验证审计记录并比较客户特征变换。
+
+## 项目结构
+
+| 模块 | 实现 |
+| --- | --- |
+| `integration/` | JSON/XML 解析；客户、商品、订单、订单明细、配送、评价六张表；字段映射、类型标准化、重复与重叠处理、文本清洗、外键验证、探索分析 |
+| `cleansing/` | 从购物车方程推断当前单价；四季运费回归；单字段候选修复、缺失恢复、运费异常行剔除；逐字段审计与导出回读验证；客户画像及变换比较 |
+| `scripts/` | 私有输入校验与中性文件名适配、公开版测试入口 |
+
+两个模块是同一作品集中的不同阶段，但使用不同的数据批次；不直接跨阶段拼接原始订单或沿用历史商品单价。三个待清洗批次也包含不同订单，客户画像使用保留订单的纵向合并，不按订单号相互连接。
+
+## 核心方法
+
+- 用结构解析器读取 JSON/XML，Pandas 构建固定粒度关系表，保留标识符与邮编中的前导零。
+- 用 source-to-target mapping 记录字段路径、转换、冲突规则和对应代码依据。
+- 购物车数量组成系数矩阵，以最小二乘解商品价格，检查矩阵满秩、留出订单和独立批次。
+- 每季单独拟合运费与距离、加急、满意度的关系，检查留出残差，而非只看拟合优度。
+- 脏数据处理基于“每行最多一个错误”的输入契约，只接受有唯一、充分支持的单字段修复；不把失败检查直接等同于错误字段。
+- 用冻结的 NLTK/VADER 资源验证情绪标签；金额遵循明确的逐项、折扣、运费舍入顺序。
+- 审计日志记录实际改动，独立比对原始值与重新读取的输出；对未改动信息、输入校验和、跨批次主键进行验证。
+- 客户画像比较 z-score、min-max 和 log1p 后标准化，检查尺度、相关性和距离贡献；不宣称已经训练聚类模型。
+
+## 运行
+
+本地发布回归已通过：三个 notebook 从头运行成功，六张关系表和三张清洗表与原始归档结果逐项一致；35 项无私有数据测试、40 项金额与脏数据回归测试通过（两组测试有重叠，不相加计数）。公开 notebook 刻意清空保存输出，完整重跑仍需合法持有私有输入。
+
+建议使用 Python 3.12，在独立环境中安装依赖：
+
+```bash
+python -m pip install -r requirements.txt
+python scripts/test_public.py
+```
+
+公开测试使用合成用例、字段契约与边界条件，不需要原始客户记录。完整处理需要你合法持有的私有输入包。仓库**不包含原始数据、逐条清洗结果或个人会话**，因此克隆后不能直接重现完整数据运行。
+
+### 1. 多源整合与探索
+
+```bash
+python scripts/prepare_inputs.py --stage integration --source /path/to/original/input-package --destination integration/raw_package
+cd integration
+python solution.py
+```
+
+也可打开 `integration/solution.ipynb` 顺序运行，再运行 `integration/exploration.ipynb` 重建分析图。输出位于该模块的 `outputs/` 和 `figures/`，均被 Git 忽略。
+
+### 2. 清洗、审计、客户画像
+
+```bash
+python scripts/prepare_inputs.py --stage cleansing --source /path/to/original/input-package.zip --destination cleansing/data
+cd cleansing
+python solution.py --data-dir data --output-dir outputs
+```
+
+或者在该目录打开 `solution.ipynb` 并 Run All。输入适配器先核对原包校验和，再仅更换本地副本文件名；不改变记录字节，不修改原始输入。冻结的 VADER 资源从私有输入包读取，不在线下载替代。
+
+## 合作与个人贡献
+
+这是四人协作成果，不是仓库维护者独立完成的所有代码。维护者主要负责客户/商品主表、相应字段映射与验证，以及脏数据诊断、商品单价推断、诊断性季节运费模型、修复和保留性测试。其他合作者负责交易与配送/评价处理、缺失恢复、异常识别、客户画像与整体整合；公共接口和交叉验证由团队协调。开发中使用了 AI 辅助，并通过可执行代码与测试核验结果。
+
+## 公开范围
+
+保留完整的处理与分析实现、可运行单元测试、字段映射和依赖说明。移除个人身份、签名、私人会话、教学说明和旧名称；清空 notebook 保存输出，避免泄露记录级数据。原始完整归档单独私有保存。本仓库未附加开源许可证，不代表第三方输入数据可再分发。
